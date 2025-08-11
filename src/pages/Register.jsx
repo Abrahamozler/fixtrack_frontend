@@ -82,6 +82,4 @@ const Register = () => {
   );
 };
 
-export default Register;```
-
-**Your application is now fully functional. Congratulations on building and deploying Fix Track Pro!**
+export default Register;
