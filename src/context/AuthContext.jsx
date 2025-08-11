@@ -1,30 +1,63 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api.js';
+import jwt_decode from 'jwt-decode';
 
-// 1. Create the context
 const AuthContext = createContext();
 
-// 2. Create the provider component
 export const AuthProvider = ({ children }) => {
-  // 3. For now, we will pretend there is no user.
-  // We have removed all logic that reads from localStorage or calls jwt-decode.
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-  // 4. Create dummy functions that do nothing for now.
-  const login = () => console.log('Login function called');
-  const register = () => console.log('Register function called');
-  const logout = () => console.log('Logout function called');
-  
-  // 5. Provide these dummy values to the rest of the app.
-  const value = { user, login, register, logout };
+  useEffect(() => {
+    const storedUserInfo = localStorage.getItem('userInfo');
+    if (storedUserInfo) {
+      try {
+        // NEW: Added a try...catch block. This is the crucial fix.
+        const userInfo = JSON.parse(storedUserInfo);
+        const decodedToken = jwt_decode(userInfo.token);
+
+        if (decodedToken.exp * 1000 < Date.now()) {
+          // Token is expired
+          logout();
+        } else {
+          // Token is valid
+          setUser(userInfo);
+        }
+      } catch (error) {
+        // If anything goes wrong (bad token, etc.), clear storage and log out.
+        console.error("Failed to parse or decode token:", error);
+        localStorage.removeItem('userInfo');
+        setUser(null);
+      }
+    }
+  }, []);
+
+  const login = async (email, password) => {
+    const { data } = await api.post('/auth/login', { email, password });
+    localStorage.setItem('userInfo', JSON.stringify(data));
+    setUser(data);
+    navigate('/');
+  };
+
+  const register = async (name, email, password) => {
+    const { data } = await api.post('/auth/register', { name, email, password });
+    localStorage.setItem('userInfo', JSON.stringify(data));
+    setUser(data);
+    navigate('/');
+  };
+
+  const logout = () => {
+    localStorage.removeItem('userInfo');
+    setUser(null);
+    navigate('/login');
+  };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// 6. Create the hook to use the context
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);
