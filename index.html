@@ -1,68 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FixTrack Pro — Frontend</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h1>FixTrack Pro</h1>
-    <div id="user-info">Not signed in</div>
-  </header>
-
-  <main id="app">
-    <section id="auth" class="card">
-      <h2>Sign In</h2>
-      <input id="email" placeholder="Email">
-      <input id="password" placeholder="Password" type="password">
-      <div class="row">
-        <button id="loginBtn">Sign In</button>
-        <button id="registerBtn">Register</button>
-      </div>
-      <p class="hint">Set API URL in <code>config.js</code></p>
-    </section>
-
-    <section id="mainUI" class="hide">
-      <div class="controls card">
-        <button id="newRecordBtn">+ New Record</button>
-        <input id="search" placeholder="Search model/customer/complaint">
-        <select id="filterStatus"><option value="all">All</option><option value="paid">Paid</option><option value="pending">Pending</option></select>
-        <button id="logoutBtn">Logout</button>
-      </div>
-
-      <section id="formCard" class="card hide">
-        <h3 id="formTitle">New Record</h3>
-        <input id="recDate" type="date">
-        <input id="recModel" placeholder="Model (e.g. Redmi Note 10)">
-        <input id="recCustomer" placeholder="Customer Name">
-        <input id="recPhone" placeholder="Customer Phone">
-        <textarea id="recComplaint" placeholder="Complaint"></textarea>
-        <div class="parts">
-          <input id="partName" placeholder="Part name">
-          <input id="partPrice" placeholder="Part price" type="number">
-          <button id="addPartBtn">Add Part</button>
-          <div id="partsList"></div>
-        </div>
-        <input id="serviceCharge" placeholder="Service charge" type="number" value="0">
-        <select id="paymentStatus"><option value="paid">Paid</option><option value="pending">Pending</option></select>
-        <div class="row">
-          <button id="saveRecordBtn">Save</button>
-          <button id="cancelRecordBtn">Cancel</button>
-        </div>
-      </section>
-
-      <section id="records" class="card">
-        <h3>Records</h3>
-        <table id="recordsTable"><thead><tr><th>Date</th><th>Model</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
-      </section>
-    </section>
-  </main>
-
-  <footer>FixTrack Pro — Frontend</footer>
-
-  <script src="config.js"></script>
-  <script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fix Track Pro</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
+```---
+### **The `src` Directory**
+
+Now, create a folder named `src`. All subsequent files will be inside this `src` folder or its subdirectories.
+
+#### **File: `src/index.css`**
+```css
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f6f8;
+}
+
+.app-container {
+  display: flex;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 24px;
+  margin-left: 240px; /* Same as Sidebar width */
+  transition: margin-left 0.3s;
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    margin-left: 0;
+  }
+}
