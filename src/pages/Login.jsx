@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Container, Box, TextField, Button, Typography, Alert, Paper } from '@mui/material';
+import { Container, Box, TextField, Button, Typography, Alert, Paper, Divider } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -21,13 +21,25 @@ const Login = () => {
     }
   };
 
+  // NEW: Guest Login handler
+  const handleGuestLogin = async () => {
+    setError('');
+    try {
+      // Use the credentials we created in Step 1
+      await login('guest@example.com', 'guestpassword123');
+      navigate('/');
+    } catch (err) {
+      setError('Guest login failed. Ensure the guest user has been registered.');
+    }
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <Paper elevation={3} sx={{ marginTop: 8, padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h5">
           Fix Track Pro - Sign In
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
           {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
           <TextField
             margin="normal"
@@ -51,7 +63,7 @@ const Login = () => {
             id="password"
             autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.targe.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <Button
             type="submit"
@@ -65,6 +77,18 @@ const Login = () => {
             Don't have an account? <Link to="/register">Sign Up</Link>
           </Typography>
         </Box>
+
+        <Divider sx={{ my: 2, width: '100%' }}>OR</Divider>
+
+        {/* NEW: Guest Login button */}
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={handleGuestLogin}
+        >
+          Continue as Guest
+        </Button>
+
       </Paper>
     </Container>
   );
