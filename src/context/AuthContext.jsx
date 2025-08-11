@@ -1,54 +1,30 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api.js'; // Ensure .js is here
-import jwt_decode from 'jwt-decode';
+import { createContext, useState, useContext } from 'react';
 
+// 1. Create the context
 const AuthContext = createContext();
 
+// 2. Create the provider component
 export const AuthProvider = ({ children }) => {
+  // 3. For now, we will pretend there is no user.
+  // We have removed all logic that reads from localStorage or calls jwt-decode.
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedUserInfo = localStorage.getItem('userInfo');
-    if (storedUserInfo) {
-      const userInfo = JSON.parse(storedUserInfo);
-      const decodedToken = jwt_decode(userInfo.token);
-      
-      // Check if token is expired
-      if (decodedToken.exp * 1000 < Date.now()) {
-        logout();
-      } else {
-        setUser(userInfo);
-      }
-    }
-  }, []);
-
-  const login = async (email, password) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    setUser(data);
-    navigate('/');
-  };
-
-  const register = async (name, email, password) => {
-    const { data } = await api.post('/auth/register', { name, email, password });
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    setUser(data);
-    navigate('/');
-  };
-
-  const logout = () => {
-    localStorage.removeItem('userInfo');
-    setUser(null);
-    navigate('/login');
-  };
+  // 4. Create dummy functions that do nothing for now.
+  const login = () => console.log('Login function called');
+  const register = () => console.log('Register function called');
+  const logout = () => console.log('Logout function called');
+  
+  // 5. Provide these dummy values to the rest of the app.
+  const value = { user, login, register, logout };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// 6. Create the hook to use the context
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
