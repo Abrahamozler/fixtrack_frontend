@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import api from '../services/api.js';
 import {
   Container, Typography, Box, TextField, Button, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, IconButton, Select, MenuItem,
-  FormControl, InputLabel, Grid
+  FormControl, InputLabel, Grid, Toolbar
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Dashboard = () => {
   const [records, setRecords] = useState([]);
@@ -25,6 +25,7 @@ const Dashboard = () => {
       setRecords(data);
     } catch (error) {
       console.error('Failed to fetch records', error);
+      // You could set an error state here to show a message to the user
     }
   };
 
@@ -98,11 +99,13 @@ const Dashboard = () => {
           <TableBody>
             {records.map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                <TableCell>{record.mobileModel}</TableCell>
-                <TableCell>{record.customerName}</TableCell>
-                <TableCell>₹{record.totalPrice.toFixed(2)}</TableCell>
-                <TableCell>{record.paymentStatus}</TableCell>
+                {/* FIX: Handle potentially missing date */}
+                <TableCell>{record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}</TableCell>
+                <TableCell>{record.mobileModel || 'N/A'}</TableCell>
+                <TableCell>{record.customerName || 'N/A'}</TableCell>
+                {/* FIX: Handle potentially missing price to prevent crash */}
+                <TableCell>₹{(record.totalPrice || 0).toFixed(2)}</TableCell>
+                <TableCell>{record.paymentStatus || 'N/A'}</TableCell>
                 {user?.role === 'Admin' && (
                   <TableCell>
                     <IconButton component={Link} to={`/edit-record/${record._id}`} color="primary">
