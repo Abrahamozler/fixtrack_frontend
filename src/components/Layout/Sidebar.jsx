@@ -3,9 +3,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import PeopleIcon from '@mui/icons-material/People';
+import AnalyticsIcon from '@mui/icons-material/Analytics'; // New Icon
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const drawerWidth = 240;
 
@@ -36,6 +36,13 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <ListItemButton>
                   <ListItemIcon><AssessmentIcon /></ListItemIcon>
                   <ListItemText primary="Financial Summary" />
+                </ListItemButton>
+              </ListItem>
+              {/* NEW LINK BELOW */}
+              <ListItem disablePadding component={Link} to="/analysis" sx={{ color: 'inherit', textDecoration: 'none' }}>
+                <ListItemButton>
+                  <ListItemIcon><AnalyticsIcon /></ListItemIcon>
+                  <ListItemText primary="Service Analysis" />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding component={Link} to="/users" sx={{ color: 'inherit', textDecoration: 'none' }}>
@@ -80,12 +87,5 @@ const Sidebar = ({ isOpen, onClose }) => {
     </Box>
   );
 };
-// ... inside the <List> for Admins
-<ListItem disablePadding component={Link} to="/analysis" sx={{ color: 'inherit', textDecoration: 'none' }}>
-    <ListItemButton>
-        <ListItemIcon><AnalyticsIcon /></ListItemIcon>
-        <ListItemText primary="Service Analysis" />
-    </ListItemButton>
-</ListItem>
 
 export default Sidebar;
