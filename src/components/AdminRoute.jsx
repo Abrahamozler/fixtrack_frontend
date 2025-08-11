@@ -13,3 +13,5 @@ const AdminRoute = ({ children }) => {
 };
 
 export default AdminRoute;
+// ... inside the protected routes section
+<Route path="/analysis" element={<AdminRoute><ServiceAnalysis /></AdminRoute>} />
