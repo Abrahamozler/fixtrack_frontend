@@ -6,14 +6,14 @@ import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 
 // Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import AddRecord from './pages/AddRecord';
-import EditRecord from './pages/EditRecord';
-import FinancialSummary from './pages/FinancialSummary';
-import ManageUsers from './pages/ManageUsers';
-import NotFound from './pages/NotFound';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import AddRecord from './pages/AddRecord.jsx';
+import EditRecord from './pages/EditRecord.jsx';
+import FinancialSummary from './pages/FinancialSummary.jsx';
+import ManageUsers from './pages/ManageUsers.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 import { useAuth } from './context/AuthContext';
 import { useState } from 'react';
