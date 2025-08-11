@@ -14,6 +14,7 @@ import EditRecord from './pages/EditRecord.jsx';
 import FinancialSummary from './pages/FinancialSummary.jsx';
 import ManageUsers from './pages/ManageUsers.jsx';
 import NotFound from './pages/NotFound.jsx';
+import ServiceAnalysis from './pages/ServiceAnalysis.jsx';
 
 import { useAuth } from './context/AuthContext';
 import { useState } from 'react';
