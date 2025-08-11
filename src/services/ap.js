@@ -4,7 +4,7 @@ const api = axios.create({
   // IMPORTANT: Replace this with your backend URL before deployment
   // Local development: 'http://localhost:5000/api'
   // Deployed: 'https://your-backend-name.onrender.com/api'
-  baseURL: 'http://localhost:5000/api', 
+  baseURL: 'https://fixtrack-backend.onrender.com', 
 });
 
 // Interceptor to add the auth token to every request
