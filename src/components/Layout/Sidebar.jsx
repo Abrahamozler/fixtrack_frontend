@@ -5,6 +5,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import PeopleIcon from '@mui/icons-material/People';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 const drawerWidth = 240;
 
@@ -79,5 +80,12 @@ const Sidebar = ({ isOpen, onClose }) => {
     </Box>
   );
 };
+// ... inside the <List> for Admins
+<ListItem disablePadding component={Link} to="/analysis" sx={{ color: 'inherit', textDecoration: 'none' }}>
+    <ListItemButton>
+        <ListItemIcon><AnalyticsIcon /></ListItemIcon>
+        <ListItemText primary="Service Analysis" />
+    </ListItemButton>
+</ListItem>
 
 export default Sidebar;
