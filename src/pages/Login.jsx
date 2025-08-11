@@ -21,11 +21,9 @@ const Login = () => {
     }
   };
 
-  // NEW: Guest Login handler
   const handleGuestLogin = async () => {
     setError('');
     try {
-      // Use the credentials we created in Step 1
       await login('guest@example.com', 'guestpassword123');
       navigate('/');
     } catch (err) {
@@ -63,6 +61,7 @@ const Login = () => {
             id="password"
             autoComplete="current-password"
             value={password}
+            // THIS IS THE CORRECTED LINE:
             onChange={(e) => setPassword(e.target.value)}
           />
           <Button
@@ -78,9 +77,8 @@ const Login = () => {
           </Typography>
         </Box>
 
-        <Divider sx={{ my: 2, width: '100%' }}>OR</Divider>
+        <Divider sx={{ my: 2, width: '100%' }} />
 
-        {/* NEW: Guest Login button */}
         <Button
           fullWidth
           variant="outlined"
