@@ -1,17 +1,30 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
-import './index.css'; // Add this back for styling
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.jsx'; // Add this import back
+import { Routes, Route, Link } from 'react-router-dom';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider> {/* Add this component back */}
-        <App />
-      </AuthProvider> {/* Add this component back */}
-    </BrowserRouter>
-  </React.StrictMode>,
-);
-```5.  Commit the change with a message like `debug: re-add AuthProvider`.
+function AboutPage() {
+  return (
+    <div>
+      <h2>About Page</h2>
+      <Link to="/">Go back to Home</Link>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <nav>
+        <Link to="/">Home</Link> | <Link to="/about">About</Link>
+      </nav>
+
+      <h1>Testing React Router</h1>
+
+      <Routes>
+        <Route index element={<h3>This is the Home Page</h3>} />
+        <Route path="/about" element={<AboutPage />} />
+      </Routes>
+    </div>
+  );
+}
+
+export default App;
