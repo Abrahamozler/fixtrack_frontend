@@ -1,11 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
-import { CssBaseline, Box } from '@mui/material';
-import Navbar from './components/Layout/Navbar';
-import Sidebar from './components/Layout/Sidebar';
-import PrivateRoute from './components/PrivateRoute';
-import AdminRoute from './components/AdminRoute';
+import { CssBaseline, Box, Toolbar } from '@mui/material';
+import Navbar from './components/Layout/Navbar.jsx';
+import Sidebar from './components/Layout/Sidebar.jsx';
+import PrivateRoute from './components/PrivateRoute.jsx';
+import AdminRoute from './components/AdminRoute.jsx';
+import { useAuth } from './context/AuthContext.jsx';
+import { useState } from 'react';
 
-// Pages
+// --- All Page Imports ---
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -13,11 +15,8 @@ import AddRecord from './pages/AddRecord.jsx';
 import EditRecord from './pages/EditRecord.jsx';
 import FinancialSummary from './pages/FinancialSummary.jsx';
 import ManageUsers from './pages/ManageUsers.jsx';
+import ServiceAnalysis from './pages/ServiceAnalysis.jsx'; // Ensure this is imported
 import NotFound from './pages/NotFound.jsx';
-import ServiceAnalysis from './pages/ServiceAnalysis.jsx';
-
-import { useAuth } from './context/AuthContext';
-import { useState } from 'react';
 
 function App() {
   const { user } = useAuth();
@@ -34,26 +33,34 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes Layout */}
+        {/* This is a special layout for non-logged-in users if we add more pages like it */}
+        {/* We will add the password reset routes here later */}
+
+        {/* This is the main layout for logged-in users */}
         <Route
           path="/*"
           element={
             <PrivateRoute>
-              <div className="app-container">
+              <Box sx={{ display: 'flex' }}>
                 <Navbar onMenuClick={toggleSidebar} />
                 <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
-                <Box component="main" className="main-content">
+                <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+                  <Toolbar /> {/* This pushes content below the AppBar */}
                   <Routes>
                     <Route index element={<Dashboard />} />
                     <Route path="/add-record" element={<AddRecord />} />
                     <Route path="/edit-record/:id" element={<EditRecord />} />
-                    {/* Admin Routes */}
+                    
+                    {/* Admin-only Routes */}
                     <Route path="/summary" element={<AdminRoute><FinancialSummary /></AdminRoute>} />
+                    <Route path="/analysis" element={<AdminRoute><ServiceAnalysis /></AdminRoute>} />
                     <Route path="/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
+                    
+                    {/* Fallback for any other path */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Box>
-              </div>
+              </Box>
             </PrivateRoute>
           }
         />
