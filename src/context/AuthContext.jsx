@@ -7,12 +7,13 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  // NEW: Add a loading state, default to true
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUserInfo = localStorage.getItem('userInfo');
+    // NEW: Check both localStorage and sessionStorage
+    const storedUserInfo = localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo');
+    
     if (storedUserInfo) {
       try {
         const userInfo = JSON.parse(storedUserInfo);
@@ -25,39 +26,48 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error("Failed to process auth token, clearing.", error);
         localStorage.removeItem('userInfo');
+        sessionStorage.removeItem('userInfo');
         setUser(null);
       }
     }
-    // NEW: Set loading to false after checking is complete
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  // NEW: The login function now accepts a 'rememberMe' boolean
+  const login = async (email, password, rememberMe) => {
     const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    
+    // NEW: Choose storage based on the rememberMe flag
+    if (rememberMe) {
+      localStorage.setItem('userInfo', JSON.stringify(data));
+    } else {
+      sessionStorage.setItem('userInfo', JSON.stringify(data));
+    }
+
     setUser(data);
     navigate('/');
   };
 
   const register = async (name, email, password) => {
     const { data } = await api.post('/auth/register', { name, email, password });
+    // Registration will always be "remembered" by default for a good user experience
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUser(data);
     navigate('/');
   };
 
   const logout = () => {
+    // NEW: Clear both storages on logout
     localStorage.removeItem('userInfo');
+    sessionStorage.removeItem('userInfo');
     setUser(null);
     navigate('/login');
   };
 
-  // NEW: Pass the loading state in the value
   const value = { user, loading, login, register, logout };
 
   return (
     <AuthContext.Provider value={value}>
-      {/* NEW: Don't render children until loading is false */}
       {!loading && children}
     </AuthContext.Provider>
   );
