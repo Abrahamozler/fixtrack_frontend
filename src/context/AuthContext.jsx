@@ -13,20 +13,15 @@ export const AuthProvider = ({ children }) => {
     const storedUserInfo = localStorage.getItem('userInfo');
     if (storedUserInfo) {
       try {
-        // NEW: Added a try...catch block. This is the crucial fix.
         const userInfo = JSON.parse(storedUserInfo);
         const decodedToken = jwt_decode(userInfo.token);
-
         if (decodedToken.exp * 1000 < Date.now()) {
-          // Token is expired
           logout();
         } else {
-          // Token is valid
           setUser(userInfo);
         }
       } catch (error) {
-        // If anything goes wrong (bad token, etc.), clear storage and log out.
-        console.error("Failed to parse or decode token:", error);
+        console.error("Failed to process auth token, clearing.", error);
         localStorage.removeItem('userInfo');
         setUser(null);
       }
