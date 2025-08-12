@@ -13,8 +13,16 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const location = useLocation();
 
+  // NEW: A wrapper function that closes the sidebar after a link is clicked
+  const handleLinkClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   const NavItem = ({ to, icon, text }) => (
-    <ListItem disablePadding component={Link} to={to} sx={{ color: 'inherit', textDecoration: 'none' }}>
+    // NEW: Added onClick to the ListItem
+    <ListItem disablePadding component={Link} to={to} sx={{ color: 'inherit', textDecoration: 'none' }} onClick={handleLinkClick}>
       <ListItemButton selected={location.pathname === to}>
         <ListItemIcon>{icon}</ListItemIcon>
         <ListItemText primary={text} sx={{ whiteSpace: 'normal' }} />
@@ -34,7 +42,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             <NavItem to="/analysis" icon={<AnalyticsIcon />} text="Service Analysis" />
           )}
 
-          {/* THIS IS THE CORRECTED LINE */}
           {user?.role === 'Admin' && (
             <>
               <Divider />
