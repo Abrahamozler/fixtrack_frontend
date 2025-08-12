@@ -5,7 +5,6 @@ import {
   FormControl, InputLabel, Select, MenuItem, Toolbar
 } from '@mui/material';
 
-// A small component for displaying individual stats
 const StatCard = ({ title, value, isCurrency = false }) => (
   <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
     <Typography variant="h6" color="text.secondary">{title}</Typography>
@@ -17,7 +16,7 @@ const StatCard = ({ title, value, isCurrency = false }) => (
 
 const ServiceAnalysis = () => {
   const [analysis, setAnalysis] = useState(null);
-  const [period, setPeriod] = useState('all'); // 'daily', 'weekly', 'monthly', 'all'
+  const [period, setPeriod] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +27,6 @@ const ServiceAnalysis = () => {
         setAnalysis(data);
       } catch (error) {
         console.error('Failed to fetch analysis', error);
-        // You could set an error state here to show a message
       } finally {
         setLoading(false);
       }
@@ -39,15 +37,13 @@ const ServiceAnalysis = () => {
   return (
     <Container maxWidth="lg">
       <Toolbar />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" component="h1">
           Service Analysis
         </Typography>
         <FormControl sx={{ minWidth: 150 }}>
-          <InputLabel id="period-select-label">Time Period</InputLabel>
+          <InputLabel>Time Period</InputLabel>
           <Select
-            labelId="period-select-label"
-            id="period-select"
             value={period}
             label="Time Period"
             onChange={(e) => setPeriod(e.target.value)}
@@ -64,7 +60,7 @@ const ServiceAnalysis = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
           <CircularProgress />
         </Box>
-      ) : (
+      ) : analysis && (
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard title="Total Repairs" value={analysis.totalRepairs} />
