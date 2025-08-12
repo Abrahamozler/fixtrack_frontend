@@ -17,7 +17,32 @@ const StatCard = ({ title, value, isCurrency = false }) => (
 );
 
 const ServiceAnalysis = () => {
-  // ... (All the logic remains the same) ...
+  const [analysis, setAnalysis] = useState(null);
+  const [period, setPeriod] = useState('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalysis = async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get(`/analysis?period=${period}`);
+        setAnalysis(data);
+      } catch (error) {
+        console.error('Failed to fetch analysis:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalysis();
+  }, [period]);
+
+  // NEW: Create a "safe" version of the analysis data to prevent crashes
+  const safeAnalysis = analysis || {
+    totalRepairs: 0,
+    totalIncome: 0,
+    totalSparePartsCost: 0,
+    profit: 0,
+  };
 
   return (
     <Container maxWidth="lg">
@@ -28,7 +53,11 @@ const ServiceAnalysis = () => {
         </Typography>
         <FormControl sx={{ minWidth: 150 }}>
           <InputLabel>Time Period</InputLabel>
-          <Select value={period} label="Time Period" onChange={(e) => setPeriod(e.target.value)}>
+          <Select
+            value={period}
+            label="Time Period"
+            onChange={(e) => setPeriod(e.target.value)}
+          >
             <MenuItem value="daily">Last 24 Hours</MenuItem>
             <MenuItem value="weekly">Last 7 Days</MenuItem>
             <MenuItem value="monthly">Last 30 Days</MenuItem>
@@ -39,12 +68,20 @@ const ServiceAnalysis = () => {
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}><CircularProgress /></Box>
-      ) : analysis && (
+      ) : (
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}><StatCard title="Total Repairs" value={analysis.totalRepairs} /></Grid>
-          <Grid item xs={12} sm={6} md={3}><StatCard title="Total Income" value={analysis.totalIncome} isCurrency /></Grid>
-          <Grid item xs={12} sm={6} md={3}><StatCard title="Spare Parts Cost" value={analysis.totalSparePartsCost} isCurrency /></Grid>
-          <Grid item xs={12} sm={6} md={3}><StatCard title="Total Profit" value={analysis.profit} isCurrency /></Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Total Repairs" value={safeAnalysis.totalRepairs} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Total Income" value={safeAnalysis.totalIncome} isCurrency />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Spare Parts Cost" value={safeAnalysis.totalSparePartsCost} isCurrency />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Total Profit" value={safeAnalysis.profit} isCurrency />
+          </Grid>
         </Grid>
       )}
     </Container>
