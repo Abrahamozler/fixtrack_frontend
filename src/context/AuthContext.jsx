@@ -1,13 +1,14 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api.js';
-// THIS IS THE CORRECTED IMPORT:
 import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  // NEW: Add a loading state, default to true
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,9 +16,7 @@ export const AuthProvider = ({ children }) => {
     if (storedUserInfo) {
       try {
         const userInfo = JSON.parse(storedUserInfo);
-        // THIS IS THE CORRECTED FUNCTION CALL:
         const decodedToken = jwtDecode(userInfo.token);
-        
         if (decodedToken.exp * 1000 < Date.now()) {
           logout();
         } else {
@@ -29,6 +28,8 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     }
+    // NEW: Set loading to false after checking is complete
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
@@ -51,9 +52,13 @@ export const AuthProvider = ({ children }) => {
     navigate('/login');
   };
 
+  // NEW: Pass the loading state in the value
+  const value = { user, loading, login, register, logout };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {/* NEW: Don't render children until loading is false */}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
