@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import api from '../services/api.js'; // Corrected path
 import {
   Container, Typography, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, IconButton, Button, Box, TextField, Alert
+  TableContainer, TableHead, TableRow, IconButton, Button, Box, TextField, Alert,
+  Toolbar // THIS IS THE MISSING IMPORT
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
