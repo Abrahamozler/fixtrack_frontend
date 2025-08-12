@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Container, Box, TextField, Button, Typography, Alert, Paper, Divider } from '@mui/material';
+import { 
+  Container, Box, TextField, Button, Typography, Alert, Paper, Divider,
+  FormControlLabel, Checkbox // Import new components
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // NEW: State for the "Remember Me" checkbox
+  const [rememberMe, setRememberMe] = useState(true); 
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -14,7 +19,8 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password);
+      // NEW: Pass the rememberMe state to the login function
+      await login(email, password, rememberMe);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to log in');
@@ -24,7 +30,8 @@ const Login = () => {
   const handleGuestLogin = async () => {
     setError('');
     try {
-      await login('guest@example.com', 'guestpassword123');
+      // Guest login will always be "remembered" for convenience
+      await login('guest@example.com', 'guestpassword123', true);
       navigate('/');
     } catch (err) {
       setError('Guest login failed. Ensure the guest user has been registered.');
@@ -40,53 +47,32 @@ const Login = () => {
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
           {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
           <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            margin="normal" required fullWidth id="email" label="Email Address" name="email"
+            autoComplete="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)}
           />
           <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            // THIS IS THE CORRECTED LINE:
-            onChange={(e) => setPassword(e.target.value)}
+            margin="normal" required fullWidth name="password" label="Password" type="password"
+            id="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)}
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
+          
+          {/* NEW: "Remember Me" Checkbox */}
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
+            label="Remember Me"
+          />
+
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, mb: 2 }}>
             Sign In
           </Button>
+
           <Typography variant="body2" align="center">
             Don't have an account? <Link to="/register">Sign Up</Link>
           </Typography>
         </Box>
-
         <Divider sx={{ my: 2, width: '100%' }} />
-
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={handleGuestLogin}
-        >
+        <Button fullWidth variant="outlined" onClick={handleGuestLogin}>
           Continue as Guest
         </Button>
-
       </Paper>
     </Container>
   );
