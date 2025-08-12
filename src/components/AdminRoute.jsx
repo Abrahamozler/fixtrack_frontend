@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext.jsx'; // Corrected path
+import { useAuth } from '../context/AuthContext.jsx'; // Correct path goes up one level
 
 const AdminRoute = ({ children }) => {
     const { user } = useAuth();
