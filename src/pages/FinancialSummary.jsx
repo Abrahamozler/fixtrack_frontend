@@ -27,23 +27,24 @@ const FinancialSummary = () => {
     fetchSummary();
   }, []);
 
-  // CORRECTED and VERIFIED export function
+  // --- FINAL CORRECTED EXPORT FUNCTION ---
   const handleExport = async (type) => {
     setExporting(true);
     try {
         const response = await api.get(`/records/export/${type}`, {
-            responseType: 'blob', // This is essential for downloading files
+            responseType: 'blob',
         });
-        const url = window.URL.createObjectURL(new Blob([response.data], { type: type === 'excel' ? 'application/vnd.ms-excel' : 'application/pdf' }));
+        const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `records_export.${type === 'excel' ? 'xlsx' : 'pdf'}`);
         document.body.appendChild(link);
         link.click();
-        link.remove();
+        link.remove(); // Clean up the link element
+        window.URL.revokeObjectURL(url); // Clean up the object URL
     } catch (error) {
         console.error(`Failed to export to ${type}:`, error);
-        alert('Export failed. Please try again.');
+        alert('Export failed. Please check the console for errors.');
     } finally {
         setExporting(false);
     }
@@ -61,7 +62,9 @@ const FinancialSummary = () => {
     <Container maxWidth="lg">
       <Toolbar />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h4" gutterBottom>Financial Summary</Typography>
+        <Typography variant="h4" component="h1">
+          Financial Summary
+        </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button variant="contained" startIcon={<DownloadIcon />} onClick={() => handleExport('excel')} disabled={loading || exporting}>
             {exporting ? 'Exporting...' : 'Export Excel'}
@@ -76,6 +79,7 @@ const FinancialSummary = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}><CircularProgress /></Box>
       ) : (
         <Grid container spacing={3}>
+          {/* ... The rest of the JSX is correct ... */}
           <Grid item xs={12} sm={4}><Card elevation={3}><CardContent sx={{ textAlign: 'center' }}>
             <Typography variant="h6">Daily Collections</Typography>
             <Typography variant="h4" color="primary">₹{safeSummary.dailyCollections.toFixed(2)}</Typography>
@@ -114,4 +118,11 @@ const FinancialSummary = () => {
   );
 };
 
-export default FinancialSummary;
+export default FinancialSummary;```
+
+After you commit these changes to both the backend and frontend, please do the following:
+1.  **Wait** for both deployments to finish.
+2.  **Clear your browser data** for the site one last time to ensure you are running the latest code.
+3.  **Log in again** and check the "Financial Summary" page.
+
+The calculations should now be correct and distinct for each period, and the export buttons should successfully download the files.
