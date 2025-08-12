@@ -1,13 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // IMPORTANT: Replace this with your backend URL before deployment
-  // Local development: 'http://localhost:5000/api'
-  // Deployed: 'https://your-backend-name.onrender.com/api'
-  baseURL: 'https://fixtrack-backend.onrender.com/api', 
+  baseURL: 'https://fixtrack-backend.onrender.com/api',
 });
 
-// Interceptor to add the auth token to every request
 api.interceptors.request.use((config) => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
   if (userInfo && userInfo.token) {
