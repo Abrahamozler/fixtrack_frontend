@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from './context/AuthContext.jsx'; // Corrected path
 
 const AdminRoute = ({ children }) => {
     const { user } = useAuth();
@@ -13,5 +13,3 @@ const AdminRoute = ({ children }) => {
 };
 
 export default AdminRoute;
-// ... inside the protected routes section
-<Route path="/analysis" element={<AdminRoute><ServiceAnalysis /></AdminRoute>} />
