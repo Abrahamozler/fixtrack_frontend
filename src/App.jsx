@@ -30,9 +30,11 @@ function App() {
     <>
       <CssBaseline />
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
+        {/* Protected Routes Layout */}
         <Route
           path="/*"
           element={
@@ -47,6 +49,7 @@ function App() {
                     <Route path="/add-record" element={<AddRecord />} />
                     <Route path="/edit-record/:id" element={<EditRecord />} />
                     
+                    {/* Admin Only Routes */}
                     <Route path="/summary" element={<AdminRoute><FinancialSummary /></AdminRoute>} />
                     <Route path="/analysis" element={<AdminRoute><ServiceAnalysis /></AdminRoute>} />
                     <Route path="/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
