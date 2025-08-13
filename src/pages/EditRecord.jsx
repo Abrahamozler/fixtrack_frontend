@@ -6,9 +6,9 @@ import {
   Select, MenuItem, FormControl, InputLabel, Alert, CircularProgress, Toolbar
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import SparePartRow from '../components/SparePartRow'; // <-- IMPORT THE NEW COMPONENT
+import SparePartRow from '../components/SparePartRow'; // Import the new component
 
-// Moved to a shared location or keep here if only used in this file
+// Define the options here or in a shared file.
 const sparePartOptions = [
   'Combo', 'Battery', 'Switch', 'Inner', 'Outer', 'Software', 'Hardware', 'IC', 'Custom'
 ];
@@ -30,7 +30,7 @@ const EditRecord = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [error, setError] = useState('');
 
-  // Auto-calculate total price (no changes here)
+  // Effect to calculate the total price
   useEffect(() => {
     if (!loading) {
       const partsTotal = spareParts.reduce((acc, part) => {
@@ -43,7 +43,7 @@ const EditRecord = () => {
     }
   }, [spareParts, formData.serviceCharge, loading]);
 
-  // Fetch record data (no changes here)
+  // Effect to fetch the initial record data
   useEffect(() => {
     const fetchRecord = async () => {
       try {
@@ -57,13 +57,14 @@ const EditRecord = () => {
             serviceCharge: data.serviceCharge || '',
             paymentStatus: data.paymentStatus || 'Pending',
         });
-        
-        const formattedParts = data.spareParts && data.spareParts.length > 0 ? 
+
+        // Format the fetched spare parts to match our state structure
+        const formattedParts = data.spareParts && data.spareParts.length > 0 ?
           data.spareParts.map(part => ({
             name: sparePartOptions.includes(part.name) ? part.name : 'Custom',
             customName: sparePartOptions.includes(part.name) ? '' : part.name,
             price: part.price || ''
-          })) : 
+          })) :
           [{ name: '', customName: '', price: '' }];
         setSpareParts(formattedParts);
 
@@ -78,12 +79,13 @@ const EditRecord = () => {
 
   const handleFormChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Simplified handler - all logic is now in SparePartRow
+  // Update the state for a specific spare part row
   const handlePartChange = (index, e) => {
     const { name, value } = e.target;
     const newParts = [...spareParts];
     newParts[index] = { ...newParts[index], [name]: value };
 
+    // If user changes dropdown to something other than "Custom", clear the custom name
     if (name === 'name' && value !== 'Custom') {
       newParts[index].customName = '';
     }
@@ -98,22 +100,24 @@ const EditRecord = () => {
     }
   };
 
-  // Submit handler (no changes here)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     const finalData = new FormData();
     Object.keys(formData).forEach(key => finalData.append(key, formData[key]));
-    
+
+    // Filter out empty parts and format them for submission
     const validSpareParts = spareParts
       .filter(part => {
-        const hasPrice = part.price.toString().trim() !== '';
-        if (part.name === 'Custom') return part.customName.trim() !== '' && hasPrice;
-        return part.name.trim() !== '' && hasPrice;
+        const hasPrice = part.price && part.price.toString().trim() !== '';
+        if (part.name === 'Custom') {
+          return part.customName && part.customName.trim() !== '' && hasPrice;
+        }
+        return part.name && part.name.trim() !== '' && hasPrice;
       })
       .map(part => ({
-        name: part.name === 'Custom' ? part.customName : part.name,
+        name: part.name === 'Custom' ? part.customName.trim() : part.name,
         price: part.price
       }));
 
@@ -127,8 +131,7 @@ const EditRecord = () => {
     }
   };
 
-
-  if (loading) return <Container sx={{mt:5, textAlign:'center'}}><CircularProgress /></Container>;
+  if (loading) return <Container sx={{ mt: 5, textAlign: 'center' }}><CircularProgress /></Container>;
 
   return (
     <Container maxWidth="md">
@@ -138,14 +141,14 @@ const EditRecord = () => {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
-            {/* Form Fields (unchanged) */}
+            {/* Main Form Fields */}
             <Grid item xs={12} sm={6}><TextField fullWidth label="Mobile Model" name="mobileModel" value={formData.mobileModel} onChange={handleFormChange} required /></Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth type="date" label="Record Date" name="recordDate" value={formData.recordDate} onChange={handleFormChange} InputLabelProps={{ shrink: true }} required /></Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth label="Customer Name" name="customerName" value={formData.customerName} onChange={handleFormChange} required /></Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth label="Customer Phone (Optional)" name="customerPhone" value={formData.customerPhone} onChange={handleFormChange} /></Grid>
             <Grid item xs={12}><TextField fullWidth label="Complaint Details" name="complaint" multiline rows={3} value={formData.complaint} onChange={handleFormChange} required /></Grid>
-            
-            {/* --- CLEANED UP SPARE PARTS SECTION --- */}
+
+            {/* Spare Parts Section - Now Cleaned Up */}
             <Grid item xs={12}><Typography variant="h6">Spare Parts</Typography></Grid>
             {spareParts.map((part, index) => (
               <SparePartRow
@@ -159,7 +162,7 @@ const EditRecord = () => {
             ))}
             <Grid item xs={12}><Button startIcon={<AddIcon />} onClick={addPart}>Add Part</Button></Grid>
 
-            {/* Financials (unchanged) */}
+            {/* Financials Section */}
             <Grid item xs={12} sm={4}><TextField fullWidth label="Service Charge (INR)" name="serviceCharge" type="number" value={formData.serviceCharge} onChange={handleFormChange} required /></Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth><InputLabel>Payment Status</InputLabel>
@@ -170,7 +173,8 @@ const EditRecord = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}><TextField fullWidth label="Total Price (INR)" value={totalPrice.toFixed(2)} InputProps={{ readOnly: true }} variant="filled" /></Grid>
-            
+
+            {/* Submit Button */}
             <Grid item xs={12}><Button type="submit" variant="contained" color="primary" size="large">Update Record</Button></Grid>
           </Grid>
         </Box>
