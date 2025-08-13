@@ -4,20 +4,20 @@ import {
 } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 
-// Predefined options for spare parts - can be imported from a shared constants file
+// It's good practice to define options in one place, either here or a shared constants file.
 const sparePartOptions = [
   'Combo', 'Battery', 'Switch', 'Inner', 'Outer', 'Software', 'Hardware', 'IC', 'Custom'
 ];
 
 const SparePartRow = ({ part, index, onPartChange, onRemovePart, canRemove }) => {
-  // Handler to pass changes up to the parent component
+  // This handler simply calls the function passed down from the parent (EditRecord).
   const handleChange = (e) => {
     onPartChange(index, e);
   };
 
   return (
     <Grid container item spacing={2} alignItems="center">
-      {/* --- Part Name Dropdown --- */}
+      {/* Part Name Dropdown */}
       <Grid item xs={12} sm={part.name === 'Custom' ? 4 : 7}>
         <FormControl fullWidth>
           <InputLabel>Part Name</InputLabel>
@@ -34,7 +34,7 @@ const SparePartRow = ({ part, index, onPartChange, onRemovePart, canRemove }) =>
         </FormControl>
       </Grid>
 
-      {/* --- Custom Part Name Input (Conditional) --- */}
+      {/* Conditional Input for Custom Part Name */}
       {part.name === 'Custom' && (
         <Grid item xs={12} sm={3}>
           <TextField
@@ -43,12 +43,12 @@ const SparePartRow = ({ part, index, onPartChange, onRemovePart, canRemove }) =>
             name="customName"
             value={part.customName}
             onChange={handleChange}
-            required // Custom name should be required if 'Custom' is selected
+            required // It's good practice to make this required if "Custom" is chosen.
           />
         </Grid>
       )}
 
-      {/* --- Price Input --- */}
+      {/* Price Input */}
       <Grid item xs={9} sm={3}>
         <TextField
           fullWidth
@@ -61,9 +61,9 @@ const SparePartRow = ({ part, index, onPartChange, onRemovePart, canRemove }) =>
         />
       </Grid>
 
-      {/* --- Remove Button --- */}
+      {/* Remove Button */}
       <Grid item xs={3} sm={2}>
-        <IconButton onClick={() => onRemovePart(index)} disabled={!canRemove}>
+        <IconButton onClick={() => onRemovePart(index)} disabled={!canRemove} aria-label="Remove Part">
           <RemoveIcon />
         </IconButton>
       </Grid>
