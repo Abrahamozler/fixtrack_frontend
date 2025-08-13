@@ -1,13 +1,12 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Box, CircularProgress } from '@mui/material'; // Import components for a loading spinner
+import { Box, CircularProgress } from '@mui/material';
 
 const PrivateRoute = ({ children }) => {
-  // NEW: Get the loading state from the context
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // NEW: If it's still loading, show a spinner
+  // If the context is still checking for a user, show a loading spinner.
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -16,12 +15,12 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  // If loading is finished AND there's no user, redirect to login
+  // If loading is finished and there is no user, redirect them to the login page.
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If loading is finished AND there is a user, show the page
+  // If loading is finished and a user exists, render the requested component.
   return children;
 };
 
