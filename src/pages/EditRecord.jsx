@@ -184,3 +184,18 @@ const EditRecord = () => {
 };
 
 export default EditRecord;
+
+// Inside EditRecord.jsx
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  // ... (all your existing form data logic)
+
+  try {
+    await api.put(`/records/${id}`, finalData);
+    // --- FIX: Navigate back with a state object to trigger a refresh ---
+    navigate('/', { state: { recordUpdated: true } }); 
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to update record.');
+  }
+};
