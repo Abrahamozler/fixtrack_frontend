@@ -199,3 +199,56 @@ const handleSubmit = async (e) => {
     setError(err.response?.data?.message || 'Failed to update record.');
   }
 };
+
+<Grid item xs={12} sm={6}>
+  <TextField 
+    fullWidth 
+    label="Customer Phone (Optional)" 
+    name="customerPhone" 
+    value={formData.customerPhone} 
+    onChange={handleFormChange} 
+  />
+</Grid>
+
+// In AddRecord.jsx and EditRecord.jsx
+
+// --- State ---
+const [beforePhoto, setBeforePhoto] = useState(null);
+const [beforePhotoPreview, setBeforePhotoPreview] = useState(null); // <-- NEW state for preview URL
+
+// --- Handler ---
+const handleBeforePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        setBeforePhoto(file);
+        setBeforePhotoPreview(URL.createObjectURL(file)); // <-- Create and set preview URL
+    }
+};
+
+const removeBeforePhoto = () => {
+    setBeforePhoto(null);
+    setBeforePhotoPreview(null);
+};
+
+
+// --- JSX ---
+<Grid item xs={12} sm={6}>
+    <Typography variant="body1">Before Photo:</Typography>
+    {beforePhotoPreview ? (
+        <Box sx={{ position: 'relative', width: '100px', height: '100px' }}>
+            <img src={beforePhotoPreview} alt="Before preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <IconButton
+                size="small"
+                onClick={removeBeforePhoto}
+                sx={{ position: 'absolute', top: 0, right: 0, backgroundColor: 'rgba(255,255,255,0.7)' }}
+            >
+                <DeleteIcon fontSize="small" />
+            </IconButton>
+        </Box>
+    ) : (
+        <Button variant="contained" component="label">
+            Upload File
+            <input type="file" hidden accept="image/*" onChange={handleBeforePhotoChange} />
+        </Button>
+    )}
+</Grid>
