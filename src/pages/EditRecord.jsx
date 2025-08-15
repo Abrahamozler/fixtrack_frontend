@@ -8,29 +8,38 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 
-// Predefined options for spare parts
+// Same predefined list of common spare parts
 const sparePartOptions = [
-  'Combo', 'Battery', 'Switch', 'Inner', 'Outer', 'Software', 'Hardware', 'IC', 'Custom'
+  'Combo', 'Battery', 'Switch', 'Inner', 'Outer', 
+  'Software', 'Hardware', 'IC', 'Custom'
 ];
 
 const EditRecord = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    return [year, month, day].join('-');
+  };
+  
   const [formData, setFormData] = useState({
-    recordDate: new Date().toISOString().split('T')[0], // Default to today
-    mobileModel: '',
-    customerName: '',
-    customerPhone: '',
-    complaint: '',
-    serviceCharge: '',
-    paymentStatus: 'Pending',
+    date: '', mobileModel: '', customerName: '', customerPhone: '',
+    complaint: '', serviceCharge: '', paymentStatus: 'Pending',
   });
-  const [spareParts, setSpareParts] = useState([{ name: '', customName: '', price: '' }]);
+  
+  const [spareParts, setSpareParts] = useState([{ selected: '', customName: '', price: '' }]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [error, setError] = useState('');
 
-  // Auto-calculate total price whenever parts or service charge change
+  // Auto-calculate total price
   useEffect(() => {
     if (!loading) {
       const partsTotal = spareParts.reduce((acc, part) => {
@@ -43,12 +52,13 @@ const EditRecord = () => {
     }
   }, [spareParts, formData.serviceCharge, loading]);
 
+  // Fetch the existing record data when the page loads
   useEffect(() => {
     const fetchRecord = async () => {
       try {
         const { data } = await api.get(`/records/${id}`);
         setFormData({
-            recordDate: data.recordDate ? new Date(data.recordDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            date: formatDateForInput(data.date),
             mobileModel: data.mobileModel || '',
             customerName: data.customerName || '',
             customerPhone: data.customerPhone || '',
@@ -56,17 +66,17 @@ const EditRecord = () => {
             serviceCharge: data.serviceCharge || '',
             paymentStatus: data.paymentStatus || 'Pending',
         });
-        
-        // Ensure spare parts data is compatible with the new structure
-        const formattedParts = data.spareParts && data.spareParts.length > 0 ? 
-          data.spareParts.map(part => ({
-            name: sparePartOptions.includes(part.name) ? part.name : 'Custom',
-            customName: sparePartOptions.includes(part.name) ? '' : part.name,
-            price: part.price || ''
-          })) : 
-          [{ name: '', customName: '', price: '' }];
-        setSpareParts(formattedParts);
 
+        // ADAPTED: Convert saved part names back to dropdown state
+        const formattedParts = data.spareParts.map(part => {
+            const isPredefined = sparePartOptions.includes(part.name);
+            return {
+                selected: isPredefined ? part.name : 'Custom',
+                customName: isPredefined ? '' : part.name,
+                price: part.price || ''
+            };
+        });
+        setSpareParts(formattedParts.length > 0 ? formattedParts : [{ selected: '', customName: '', price: '' }]);
       } catch (err) {
         setError('Failed to fetch record data.');
       } finally {
@@ -77,45 +87,34 @@ const EditRecord = () => {
   }, [id]);
 
   const handleFormChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
   const handlePartChange = (index, e) => {
-    const { name, value } = e.target;
     const newParts = [...spareParts];
-    newParts[index][name] = value;
-    // If the selected option is not 'Custom', clear the custom name field
-    if (name === 'name' && value !== 'Custom') {
-      newParts[index].customName = '';
-    }
+    newParts[index][e.target.name] = e.target.value;
     setSpareParts(newParts);
   };
-
-  const addPart = () => setSpareParts([...spareParts, { name: '', customName: '', price: '' }]);
-
+  const addPart = () => setSpareParts([...spareParts, { selected: '', customName: '', price: '' }]);
   const removePart = (index) => {
-    if (spareParts.length > 1) {
-      setSpareParts(spareParts.filter((_, i) => i !== index));
-    }
+    if (spareParts.length > 1) setSpareParts(spareParts.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    const finalData = new FormData();
-    Object.keys(formData).forEach(key => finalData.append(key, formData[key]));
+    const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+    const data = new FormData();
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
     
-    // Process spare parts to submit the correct name (either predefined or custom)
     const validSpareParts = spareParts
-      .filter(part => (part.name && part.name.trim() !== '' && part.price.toString().trim() !== ''))
       .map(part => ({
-        name: part.name === 'Custom' ? part.customName : part.name,
+        name: part.selected === 'Custom' ? part.customName : part.selected,
         price: part.price
-      }));
-
-    finalData.append('spareParts', JSON.stringify(validSpareParts));
+      }))
+      .filter(part => part.name && part.name.trim() !== '' && part.price.toString().trim() !== '');
+      
+    data.append('spareParts', JSON.stringify(validSpareParts));
 
     try {
-      await api.put(`/records/${id}`, finalData);
+      await api.put(`/records/${id}`, data, config);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update record.');
@@ -132,37 +131,39 @@ const EditRecord = () => {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
-            {/* Form Fields */}
+            {/* --- Form Fields --- */}
             <Grid item xs={12} sm={6}><TextField fullWidth label="Mobile Model" name="mobileModel" value={formData.mobileModel} onChange={handleFormChange} required /></Grid>
-            <Grid item xs={12} sm={6}><TextField fullWidth type="date" label="Record Date" name="recordDate" value={formData.recordDate} onChange={handleFormChange} InputLabelProps={{ shrink: true }} required /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth label="Service Date" type="date" name="date" value={formData.date} onChange={handleFormChange} InputLabelProps={{ shrink: true }} /></Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth label="Customer Name" name="customerName" value={formData.customerName} onChange={handleFormChange} required /></Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth label="Customer Phone (Optional)" name="customerPhone" value={formData.customerPhone} onChange={handleFormChange} /></Grid>
             <Grid item xs={12}><TextField fullWidth label="Complaint Details" name="complaint" multiline rows={3} value={formData.complaint} onChange={handleFormChange} required /></Grid>
             
-            {/* Spare Parts */}
+            {/* --- Spare Parts with Dropdown --- */}
             <Grid item xs={12}><Typography variant="h6">Spare Parts</Typography></Grid>
             {spareParts.map((part, index) => (
               <Grid container item spacing={2} key={index} alignItems="center">
-                <Grid item xs={12} sm={part.name === 'Custom' ? 4 : 7}>
-                  <FormControl fullWidth>
-                    <InputLabel>Part Name</InputLabel>
-                    <Select name="name" value={part.name} label="Part Name" onChange={e => handlePartChange(index, e)}>
-                      {sparePartOptions.map(option => <MenuItem key={option} value={option}>{option}</MenuItem>)}
+                <Grid item xs={12} sm={part.selected === 'Custom' ? 4 : 6}>
+                  <FormControl fullWidth><InputLabel>Part Name</InputLabel>
+                    <Select name="selected" value={part.selected} label="Part Name" onChange={e => handlePartChange(index, e)}>
+                      {sparePartOptions.map(option => (<MenuItem key={option} value={option}>{option}</MenuItem>))}
                     </Select>
                   </FormControl>
                 </Grid>
-                {part.name === 'Custom' && (
-                  <Grid item xs={12} sm={3}>
-                    <TextField fullWidth label="Custom Part" name="customName" value={part.customName} onChange={e => handlePartChange(index, e)} />
+                {part.selected === 'Custom' && (
+                  <Grid item xs={12} sm={4}>
+                    <TextField fullWidth label="Custom Part Name" name="customName" value={part.customName} onChange={e => handlePartChange(index, e)} />
                   </Grid>
                 )}
-                <Grid item xs={9} sm={3}><TextField fullWidth label="Price" name="price" type="number" value={part.price} onChange={e => handlePartChange(index, e)} /></Grid>
+                <Grid item xs={9} sm={part.selected === 'Custom' ? 2 : 4}>
+                    <TextField fullWidth label="Price" name="price" type="number" value={part.price} onChange={e => handlePartChange(index, e)} />
+                </Grid>
                 <Grid item xs={3} sm={2}><IconButton onClick={() => removePart(index)}><RemoveIcon /></IconButton></Grid>
               </Grid>
             ))}
-            <Grid item xs={12}><Button startIcon={<AddIcon />} onClick={addPart}>Add Part</Button></Grid>
+            <Grid item xs={12}><Button startIcon={<AddIcon />} onClick={addPart}>Add Another Part</Button></Grid>
 
-            {/* Financials */}
+            {/* --- Financials Section --- */}
+            <Grid item xs={12}><Typography variant="h6">Billing</Typography></Grid>
             <Grid item xs={12} sm={4}><TextField fullWidth label="Service Charge (INR)" name="serviceCharge" type="number" value={formData.serviceCharge} onChange={handleFormChange} required /></Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth><InputLabel>Payment Status</InputLabel>
@@ -174,7 +175,7 @@ const EditRecord = () => {
             </Grid>
             <Grid item xs={12} sm={4}><TextField fullWidth label="Total Price (INR)" value={totalPrice.toFixed(2)} InputProps={{ readOnly: true }} variant="filled" /></Grid>
             
-            <Grid item xs={12}><Button type="submit" variant="contained" color="primary" size="large">Update Record</Button></Grid>
+            <Grid item xs={12} sx={{ mt: 2 }}><Button type="submit" variant="contained" color="primary" size="large">Update Record</Button></Grid>
           </Grid>
         </Box>
       </Paper>
