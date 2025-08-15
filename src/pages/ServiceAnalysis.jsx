@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import {
   Container, Grid, Card, CardContent, Typography, Box, CircularProgress,
-  Toolbar, Paper, Button, TextField, ToggleButtonGroup, ToggleButton
+  Toolbar, Paper, TextField, ToggleButtonGroup, ToggleButton
 } from '@mui/material';
 
 // Helper function to format date to YYYY-MM-DD for input fields
@@ -16,13 +16,22 @@ const formatDate = (date) => {
     return [year, month, day].join('-');
 };
 
-const StatCard = ({ title, value, isCurrency = false }) => ( /* ... (this component remains the same) ... */ );
+// --- THIS IS THE CORRECTED StatCard COMPONENT ---
+const StatCard = ({ title, value, isCurrency = false }) => (
+  <Card elevation={3} sx={{ height: '100%' }}>
+    <CardContent sx={{ textAlign: 'center', p: 3 }}>
+      <Typography variant="h6" color="text.secondary">{title}</Typography>
+      <Typography variant="h4" color="primary" sx={{ mt: 1 }}>
+        {isCurrency ? `₹${(value || 0).toFixed(2)}` : value || 0}
+      </Typography>
+    </CardContent>
+  </Card>
+);
+// --- END OF CORRECTION ---
 
 const ServiceAnalysis = () => {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // NEW: State for our date filters
   const [quickFilter, setQuickFilter] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -30,14 +39,11 @@ const ServiceAnalysis = () => {
   useEffect(() => {
     const fetchAnalysis = async () => {
       setLoading(true);
-      
-      // Don't fetch if custom range is selected but dates are missing
       if (quickFilter === 'custom' && (!startDate || !endDate)) {
         setAnalysis(null);
         setLoading(false);
         return;
       }
-      
       try {
         const { data } = await api.get('/analysis', {
           params: { startDate, endDate }
@@ -50,7 +56,7 @@ const ServiceAnalysis = () => {
       }
     };
     fetchAnalysis();
-  }, [startDate, endDate]); // Refetch whenever the date range changes
+  }, [startDate, endDate]);
 
   const handleQuickFilterChange = (event, newFilter) => {
     if (newFilter !== null) {
@@ -79,11 +85,10 @@ const ServiceAnalysis = () => {
           setEndDate(formatDate(today));
           break;
         case 'all':
-          setStartDate('1970-01-01'); // A very early date for "all time"
+          setStartDate('1970-01-01');
           setEndDate(formatDate(today));
           break;
         case 'custom':
-          // Let user pick dates, do nothing here
           break;
         default:
           break;
@@ -100,12 +105,11 @@ const ServiceAnalysis = () => {
         Service Analysis
       </Typography>
 
-      {/* --- NEW FILTER CONTROLS --- */}
       <Paper sx={{ p: 2, mb: 4 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12}>
             <Typography variant="subtitle1">Quick Filters</Typography>
-            <ToggleButtonGroup value={quickFilter} exclusive onChange={handleQuickFilterChange} fullWidth>
+            <ToggleButtonGroup value={quickFilter} exclusive onChange={handleQuickFilterChange} fullWidth sx={{flexWrap: 'wrap'}}>
               <ToggleButton value="today">Today</ToggleButton>
               <ToggleButton value="yesterday">Yesterday</ToggleButton>
               <ToggleButton value="last7">Last 7 Days</ToggleButton>
@@ -113,12 +117,12 @@ const ServiceAnalysis = () => {
               <ToggleButton value="all">All Time</ToggleButton>
             </ToggleButtonGroup>
           </Grid>
-          <Grid item xs={12} sm={5}>
+          <Grid item xs={12} sm={6}>
             <TextField fullWidth label="Start Date" type="date" value={startDate}
               onChange={(e) => { setStartDate(e.target.value); setQuickFilter('custom'); }}
               InputLabelProps={{ shrink: true }} />
           </Grid>
-          <Grid item xs={12} sm={5}>
+          <Grid item xs={12} sm={6}>
             <TextField fullWidth label="End Date" type="date" value={endDate}
               onChange={(e) => { setEndDate(e.target.value); setQuickFilter('custom'); }}
               InputLabelProps={{ shrink: true }} />
@@ -130,7 +134,10 @@ const ServiceAnalysis = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}><CircularProgress /></Box>
       ) : (
         <Grid container spacing={3}>
-          {/* ... (The StatCard display is the same) ... */}
+          <Grid item xs={12} sm={6} md={3}><StatCard title="Total Repairs" value={safeAnalysis.totalRepairs} /></Grid>
+          <Grid item xs={12} sm={6} md={3}><StatCard title="Total Income" value={safeAnalysis.totalIncome} isCurrency /></Grid>
+          <Grid item xs={12} sm={6} md={3}><StatCard title="Spare Parts Cost" value={safeAnalysis.totalSparePartsCost} isCurrency /></Grid>
+          <Grid item xs={12} sm={6} md={3}><StatCard title="Total Profit" value={safeAnalysis.profit} isCurrency /></Grid>
         </Grid>
       )}
     </Container>
