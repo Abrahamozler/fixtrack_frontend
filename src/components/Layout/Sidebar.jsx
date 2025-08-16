@@ -4,6 +4,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import PeopleIcon from '@mui/icons-material/People';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SettingsIcon from '@mui/icons-material/Settings';   // ✅ new import
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
@@ -13,7 +14,6 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  // NEW: A wrapper function that closes the sidebar after a link is clicked
   const handleLinkClick = () => {
     if (onClose) {
       onClose();
@@ -21,8 +21,13 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const NavItem = ({ to, icon, text }) => (
-    // NEW: Added onClick to the ListItem
-    <ListItem disablePadding component={Link} to={to} sx={{ color: 'inherit', textDecoration: 'none' }} onClick={handleLinkClick}>
+    <ListItem
+      disablePadding
+      component={Link}
+      to={to}
+      sx={{ color: 'inherit', textDecoration: 'none' }}
+      onClick={handleLinkClick}
+    >
       <ListItemButton selected={location.pathname === to}>
         <ListItemIcon>{icon}</ListItemIcon>
         <ListItemText primary={text} sx={{ whiteSpace: 'normal' }} />
@@ -47,6 +52,8 @@ const Sidebar = ({ isOpen, onClose }) => {
               <Divider />
               <NavItem to="/summary" icon={<AssessmentIcon />} text="Financial Summary" />
               <NavItem to="/users" icon={<PeopleIcon />} text="Manage Users" />
+              {/* ✅ New Settings nav item */}
+              <NavItem to="/settings" icon={<SettingsIcon />} text="Settings" />
             </>
           )}
         </List>
@@ -56,6 +63,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+      {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         open={isOpen}
@@ -68,6 +76,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       >
         {drawerContent}
       </Drawer>
+
+      {/* Permanent Drawer */}
       <Drawer
         variant="permanent"
         sx={{
