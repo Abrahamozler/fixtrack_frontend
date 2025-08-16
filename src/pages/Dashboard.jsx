@@ -13,8 +13,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+// import { useAuth } from '../context/AuthContext.jsx'; // No longer needed for role check here
 
+// --- ViewRecordDialog component remains unchanged ---
 const ViewRecordDialog = ({ record, open, onClose }) => {
   if (!record) return null;
   return (
@@ -74,27 +75,28 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({ search: '', status: '', startDate: '', endDate: '' });
   const [sort, setSort] = useState('newest');
   const [quickFilter, setQuickFilter] = useState('all');
-  const { user } = useAuth();
+  // const { user } = useAuth(); // No longer needed for role check here
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isViewOpen, setViewOpen] = useState(false);
+  
+  const fetchRecords = async () => { // Defined once to be reusable
+    try {
+      const { data } = await api.get('/records', {
+        params: { ...filters, sort, page: currentPage }
+      });
+      setRecords(data.records);
+      setCurrentPage(data.currentPage);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error('Failed to fetch records:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const { data } = await api.get('/records', {
-          params: { ...filters, sort, page: currentPage }
-        });
-        setRecords(data.records);
-        setCurrentPage(data.currentPage);
-        setTotalPages(data.totalPages);
-      } catch (error) {
-        console.error('Failed to fetch records:', error);
-      }
-    };
     fetchRecords();
   }, [filters, sort, currentPage]);
 
@@ -133,7 +135,7 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
         await api.delete(`/records/${id}`);
-        fetchRecords();
+        fetchRecords(); // Refresh records after deletion
       } catch (error) { console.error('Failed to delete record:', error); }
     }
   };
@@ -159,6 +161,7 @@ const Dashboard = () => {
       <Toolbar />
       <Typography variant="h4" gutterBottom>Repair Records Dashboard</Typography>
       
+      {/* --- Filter section remains unchanged --- */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12}><ToggleButtonGroup value={quickFilter} exclusive onChange={handleQuickFilterChange} fullWidth sx={{flexWrap: 'wrap'}}>
@@ -185,7 +188,8 @@ const Dashboard = () => {
             <TableRow>
               <TableCell>Date</TableCell><TableCell>Model</TableCell><TableCell>Customer</TableCell>
               <TableCell>Total Price (INR)</TableCell><TableCell>Status</TableCell>
-              {user?.role === 'Admin' && <TableCell align="right">Actions</TableCell>}
+              {/* ✅ CHANGE 1: Removed conditional rendering for the header */}
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -196,20 +200,20 @@ const Dashboard = () => {
                 <TableCell>{record.customerName || 'N/A'}</TableCell>
                 <TableCell>₹{(record.totalPrice || 0).toFixed(2)}</TableCell>
                 <TableCell>{record.paymentStatus || 'N/A'}</TableCell>
-                {user?.role === 'Admin' && (
-                  <TableCell align="right">
-                    <IconButton onClick={() => handleViewOpen(record)} color="info" title="View Details"><VisibilityIcon /></IconButton>
-                    <IconButton onClick={() => handleInvoiceDownload(record._id)} color="default" title="Download Invoice"><PictureAsPdfIcon /></IconButton>
-                    <IconButton component={Link} to={`/edit-record/${record._id}`} color="primary" title="Edit Record"><EditIcon /></IconButton>
-                    <IconButton onClick={() => handleDelete(record._id)} color="error" title="Delete Record"><DeleteIcon /></IconButton>
-                  </TableCell>
-                )}
+                {/* ✅ CHANGE 2: Removed conditional wrapper to show actions for ALL users */}
+                <TableCell align="right">
+                  <IconButton onClick={() => handleViewOpen(record)} color="info" title="View Details"><VisibilityIcon /></IconButton>
+                  <IconButton onClick={() => handleInvoiceDownload(record._id)} color="default" title="Download Invoice"><PictureAsPdfIcon /></IconButton>
+                  <IconButton component={Link} to={`/edit-record/${record._id}`} color="primary" title="Edit Record"><EditIcon /></IconButton>
+                  <IconButton onClick={() => handleDelete(record._id)} color="error" title="Delete Record"><DeleteIcon /></IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
+      {/* --- Pagination remains unchanged --- */}
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2, mt: 2, backgroundColor: 'background.paper', borderRadius: 1 }}>
         <IconButton onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
           <NavigateBeforeIcon />
