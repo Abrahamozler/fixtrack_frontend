@@ -1,12 +1,3 @@
-import { Routes, Route } from 'react-router-dom';
-import { CssBaseline, Box, Toolbar } from '@mui/material';
-import Navbar from './components/Layout/Navbar.jsx';
-import Sidebar from './components/Layout/Sidebar.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx';
-import AdminRoute from './components/AdminRoute.jsx';
-import { useAuth } from './context/AuthContext.jsx';
-import { useState } from 'react';
-
 // --- All Page Imports ---
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
@@ -17,6 +8,7 @@ import FinancialSummary from './pages/FinancialSummary.jsx';
 import ManageUsers from './pages/ManageUsers.jsx';
 import ServiceAnalysis from './pages/ServiceAnalysis.jsx';
 import NotFound from './pages/NotFound.jsx';
+import SettingsPage from './pages/SettingsPage.jsx';  // ✅ new import
 
 function App() {
   const { user } = useAuth();
@@ -50,7 +42,10 @@ function App() {
                     <Route path="/summary" element={<AdminRoute><FinancialSummary /></AdminRoute>} />
                     <Route path="/analysis" element={<AdminRoute><ServiceAnalysis /></AdminRoute>} />
                     <Route path="/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
-                    
+
+                    {/* ✅ New Settings page route */}
+                    <Route path="/settings" element={<AdminRoute><SettingsPage /></AdminRoute>} />
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Box>
@@ -62,5 +57,3 @@ function App() {
     </>
   );
 }
-
-export default App;
