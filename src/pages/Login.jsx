@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { 
   Container, Box, TextField, Button, Typography, Alert, Paper, Divider,
-  FormControlLabel, Checkbox // Import new components
+  FormControlLabel, Checkbox
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // NEW: State for the "Remember Me" checkbox
   const [rememberMe, setRememberMe] = useState(true); 
   const [error, setError] = useState('');
   const { login } = useAuth();
@@ -19,22 +18,10 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      // NEW: Pass the rememberMe state to the login function
-      await login(email, password, rememberMe);
+      await login(username, password, rememberMe);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to log in');
-    }
-  };
-
-  const handleGuestLogin = async () => {
-    setError('');
-    try {
-      // Guest login will always be "remembered" for convenience
-      await login('guest@example.com', 'guestpassword123', true);
-      navigate('/');
-    } catch (err) {
-      setError('Guest login failed. Ensure the guest user has been registered.');
     }
   };
 
@@ -47,15 +34,14 @@ const Login = () => {
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
           {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
           <TextField
-            margin="normal" required fullWidth id="email" label="Email Address" name="email"
-            autoComplete="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)}
+            margin="normal" required fullWidth id="username" label="Username" name="username"
+            autoComplete="username" autoFocus value={username} onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
             margin="normal" required fullWidth name="password" label="Password" type="password"
             id="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)}
           />
           
-          {/* NEW: "Remember Me" Checkbox */}
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
             label="Remember Me"
@@ -70,9 +56,6 @@ const Login = () => {
           </Typography>
         </Box>
         <Divider sx={{ my: 2, width: '100%' }} />
-        <Button fullWidth variant="outlined" onClick={handleGuestLogin}>
-          Continue as Guest
-        </Button>
       </Paper>
     </Container>
   );
