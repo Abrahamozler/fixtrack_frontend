@@ -57,3 +57,5 @@ function App() {
     </>
   );
 }
+
+export default App;   // ✅ ADD THIS LINE
