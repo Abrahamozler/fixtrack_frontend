@@ -1,10 +1,13 @@
-import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider } from '@mui/material';
+import {
+  Drawer, Box, List, ListItem, ListItemButton,
+  ListItemIcon, ListItemText, Toolbar, Divider
+} from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import PeopleIcon from '@mui/icons-material/People';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
-import SettingsIcon from '@mui/icons-material/Settings';   // ✅ new import
+import SettingsIcon from '@mui/icons-material/Settings'; // ✅ NEW
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
@@ -15,9 +18,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
 
   const handleLinkClick = () => {
-    if (onClose) {
-      onClose();
-    }
+    if (onClose) onClose();
   };
 
   const NavItem = ({ to, icon, text }) => (
@@ -35,6 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     </ListItem>
   );
 
+  // Paths are absolute to match location.pathname comparisons
   const drawerContent = (
     <div>
       <Toolbar />
@@ -52,8 +54,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <Divider />
               <NavItem to="/summary" icon={<AssessmentIcon />} text="Financial Summary" />
               <NavItem to="/users" icon={<PeopleIcon />} text="Manage Users" />
-              {/* ✅ New Settings nav item */}
-              <NavItem to="/settings" icon={<SettingsIcon />} text="Settings" />
+              <NavItem to="/settings" icon={<SettingsIcon />} text="Settings" /> {/* ✅ NEW */}
             </>
           )}
         </List>
@@ -63,7 +64,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
-      {/* Mobile Drawer */}
+      {/* Mobile */}
       <Drawer
         variant="temporary"
         open={isOpen}
@@ -77,7 +78,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         {drawerContent}
       </Drawer>
 
-      {/* Permanent Drawer */}
+      {/* Desktop */}
       <Drawer
         variant="permanent"
         sx={{
