@@ -4,8 +4,8 @@ import { Container, Box, TextField, Button, Typography, Alert, Paper } from '@mu
 import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { register } = useAuth();
@@ -15,7 +15,7 @@ const Register = () => {
     e.preventDefault();
     setError('');
     try {
-      await register(name, email, password);
+      await register(username, password, referralCode);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to register');
@@ -28,30 +28,29 @@ const Register = () => {
         <Typography component="h1" variant="h5">
           Sign Up
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
           {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
           <TextField
             margin="normal"
             required
             fullWidth
-            id="name"
-            label="Full Name"
-            name="name"
-            autoComplete="name"
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
             autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="referralCode"
+            label="Referral Code"
+            name="referralCode"
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value)}
           />
           <TextField
             margin="normal"
