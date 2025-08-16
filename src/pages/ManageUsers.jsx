@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api.js'; // Corrected path
+import api from '../services/api.js';
 import {
   Container, Typography, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, IconButton, Button, Box, TextField, Alert,
-  Toolbar // THIS IS THE MISSING IMPORT
+  Toolbar
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -27,9 +26,13 @@ const ManageUsers = () => {
     e.preventDefault();
     setError('');
     try {
-      await api.post('/users/staff', { name, email, password });
-      setName('');
-      setEmail('');
+      // ✅ Use referralCode automatically for staff registration
+      await api.post('/auth/register', { 
+        username, 
+        password, 
+        referralCode: '8129' 
+      });
+      setUsername('');
       setPassword('');
       fetchUsers(); // Refresh list
     } catch (err) {
@@ -57,8 +60,7 @@ const ManageUsers = () => {
         <Typography variant="h6" gutterBottom>Add New Staff Member</Typography>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Box component="form" onSubmit={handleAddStaff} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-          <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <TextField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
           <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           <Button type="submit" variant="contained">Add Staff</Button>
         </Box>
@@ -68,8 +70,7 @@ const ManageUsers = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell>Username</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -77,8 +78,7 @@ const ManageUsers = () => {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user._id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.username}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleDelete(user._id)} color="error" disabled={user.role === 'Admin'}>
