@@ -11,9 +11,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // NEW: Check both localStorage and sessionStorage
     const storedUserInfo = localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo');
-    
     if (storedUserInfo) {
       try {
         const userInfo = JSON.parse(storedUserInfo);
@@ -33,31 +31,27 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // NEW: The login function now accepts a 'rememberMe' boolean
-  const login = async (email, password, rememberMe) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    
-    // NEW: Choose storage based on the rememberMe flag
+  // login now uses username
+  const login = async (username, password, rememberMe) => {
+    const { data } = await api.post('/auth/login', { username, password });
     if (rememberMe) {
       localStorage.setItem('userInfo', JSON.stringify(data));
     } else {
       sessionStorage.setItem('userInfo', JSON.stringify(data));
     }
-
     setUser(data);
     navigate('/');
   };
 
-  const register = async (name, email, password) => {
-    const { data } = await api.post('/auth/register', { name, email, password });
-    // Registration will always be "remembered" by default for a good user experience
+  // register now uses username + referralCode
+  const register = async (username, password, referralCode) => {
+    const { data } = await api.post('/auth/register', { username, password, referralCode });
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUser(data);
     navigate('/');
   };
 
   const logout = () => {
-    // NEW: Clear both storages on logout
     localStorage.removeItem('userInfo');
     sessionStorage.removeItem('userInfo');
     setUser(null);
