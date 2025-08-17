@@ -14,10 +14,13 @@ const SettingsPage = () => {
         const fetchCode = async () => {
             setLoading(true);
             try {
-                const { data } = await api.get('/settings');
+                const { data } = await api.get('/settings', {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
                 if (data?.staffReferralCode) setReferralCode(data.staffReferralCode);
             } catch (err) {
-                setError('Failed to fetch referral code.');
+                console.error(err);
+                setError(err.response?.data?.message || 'Failed to fetch referral code.');
             } finally {
                 setLoading(false);
             }
@@ -34,10 +37,14 @@ const SettingsPage = () => {
         }
         setUpdating(true);
         try {
-            await api.put('/settings', { staffReferralCode: referralCode });
+            const { data } = await api.put('/settings', { staffReferralCode: referralCode }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
             setMessage('Referral code updated successfully!');
+            setReferralCode(data.staffReferralCode);
         } catch (err) {
-            setError('Failed to update code.');
+            console.error(err);
+            setError(err.response?.data?.message || 'Failed to update code.');
         } finally {
             setUpdating(false);
         }
