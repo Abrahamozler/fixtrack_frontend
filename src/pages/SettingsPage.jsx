@@ -9,24 +9,26 @@ const SettingsPage = () => {
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
 
+    const token = localStorage.getItem('token'); // Make sure your auth token is stored here
+
     // Fetch existing referral code
     useEffect(() => {
         const fetchCode = async () => {
             setLoading(true);
             try {
                 const { data } = await api.get('/settings', {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 if (data?.staffReferralCode) setReferralCode(data.staffReferralCode);
             } catch (err) {
-                console.error(err);
+                console.error('Fetch error:', err.response || err);
                 setError(err.response?.data?.message || 'Failed to fetch referral code.');
             } finally {
                 setLoading(false);
             }
         };
         fetchCode();
-    }, []);
+    }, [token]);
 
     const handleUpdate = async () => {
         setMessage('');
@@ -37,13 +39,15 @@ const SettingsPage = () => {
         }
         setUpdating(true);
         try {
-            const { data } = await api.put('/settings', { staffReferralCode: referralCode }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            const { data } = await api.put(
+                '/settings',
+                { staffReferralCode: referralCode },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             setMessage('Referral code updated successfully!');
-            setReferralCode(data.staffReferralCode);
+            setReferralCode(data.staffReferralCode); // confirm update
         } catch (err) {
-            console.error(err);
+            console.error('Update error:', err.response || err);
             setError(err.response?.data?.message || 'Failed to update code.');
         } finally {
             setUpdating(false);
