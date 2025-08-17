@@ -12,42 +12,68 @@ const ManageUsers = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+
+  // Fetch referral code from settings
+  const fetchReferralCode = async () => {
+    try {
+      const { data } = await api.get('/settings');
+      if (data?.staffReferralCode) setReferralCode(data.staffReferralCode);
+    } catch (err) {
+      console.error('Failed to fetch referral code');
+    }
+  };
 
   const fetchUsers = async () => {
-    const { data } = await api.get('/users');
-    setUsers(data);
+    setLoading(true);
+    try {
+      const { data } = await api.get('/users');
+      setUsers(data);
+    } catch (err) {
+      console.error('Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
+    fetchReferralCode(); // fetch latest referral code
     fetchUsers();
   }, []);
 
   const handleAddStaff = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+    setSubmitting(true);
     try {
-      // ✅ Use referralCode automatically for staff registration
       await api.post('/auth/register', { 
         username, 
         password, 
-        referralCode: '8129' 
+        referralCode // use dynamic code
       });
       setUsername('');
       setPassword('');
-      fetchUsers(); // Refresh list
+      setMessage('Staff added successfully!');
+      fetchUsers();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add staff');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await api.delete(`/users/${id}`);
-        fetchUsers();
-      } catch (err) {
-        alert(err.response?.data?.message || 'Failed to delete user');
-      }
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await api.delete(`/users/${id}`);
+      fetchUsers();
+      setMessage('User deleted successfully!');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete user');
     }
   };
 
@@ -58,38 +84,65 @@ const ManageUsers = () => {
       
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>Add New Staff Member</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Current referral code: <b>{referralCode || 'Loading...'}</b>
+        </Typography>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
         <Box component="form" onSubmit={handleAddStaff} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <TextField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-          <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <Button type="submit" variant="contained">Add Staff</Button>
+          <TextField 
+            label="Username" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)} 
+            required 
+          />
+          <TextField 
+            label="Password" 
+            type="password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+          />
+          <Button type="submit" variant="contained" disabled={submitting}>
+            {submitting ? 'Adding...' : 'Add Staff'}
+          </Button>
         </Box>
       </Paper>
-      
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Username</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user._id}>
-                <TableCell>{user.username}</TableCell>
-                <TableCell>{user.role}</TableCell>
-                <TableCell>
-                  <IconButton onClick={() => handleDelete(user._id)} color="error" disabled={user.role === 'Admin'}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+
+      <Paper>
+        {loading ? (
+          <Typography sx={{ p: 3 }}>Loading users...</Typography>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user._id}>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                    <TableCell>
+                      <IconButton 
+                        onClick={() => handleDelete(user._id)} 
+                        color="error" 
+                        disabled={user.role === 'Admin'}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Paper>
     </Container>
   );
 };
