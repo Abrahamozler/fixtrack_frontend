@@ -17,30 +17,34 @@ const ManageUsers = () => {
   const [submitting, setSubmitting] = useState(false);
   const [referralCode, setReferralCode] = useState('');
 
-  // Fetch referral code from settings
+  // Fetch referral code and users
   const fetchReferralCode = async () => {
     try {
-      const { data } = await api.get('/settings');
+      const { data } = await api.get('/settings', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       if (data?.staffReferralCode) setReferralCode(data.staffReferralCode);
     } catch (err) {
-      console.error('Failed to fetch referral code');
+      console.error('Failed to fetch referral code', err);
     }
   };
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/users');
+      const { data } = await api.get('/users', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       setUsers(data);
     } catch (err) {
-      console.error('Failed to fetch users');
+      console.error('Failed to fetch users', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchReferralCode(); // fetch latest referral code
+    fetchReferralCode();
     fetchUsers();
   }, []);
 
@@ -50,10 +54,12 @@ const ManageUsers = () => {
     setMessage('');
     setSubmitting(true);
     try {
-      await api.post('/auth/register', { 
-        username, 
-        password, 
-        referralCode // use dynamic code
+      await api.post('/auth/register', {
+        username,
+        password,
+        referralCode
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setUsername('');
       setPassword('');
@@ -69,7 +75,9 @@ const ManageUsers = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await api.delete(`/users/${id}`);
+      await api.delete(`/users/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       fetchUsers();
       setMessage('User deleted successfully!');
     } catch (err) {
@@ -90,19 +98,8 @@ const ManageUsers = () => {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
         <Box component="form" onSubmit={handleAddStaff} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <TextField 
-            label="Username" 
-            value={username} 
-            onChange={(e) => setUsername(e.target.value)} 
-            required 
-          />
-          <TextField 
-            label="Password" 
-            type="password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-          />
+          <TextField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           <Button type="submit" variant="contained" disabled={submitting}>
             {submitting ? 'Adding...' : 'Add Staff'}
           </Button>
