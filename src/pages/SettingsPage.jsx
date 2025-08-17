@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../services/api.js";
 import { Container, Typography, Paper, TextField, Button, Box, Alert, Toolbar } from "@mui/material";
+import { useAuth } from "../context/AuthContext";
 
 const SettingsPage = () => {
   const [referralCode, setReferralCode] = useState("");
@@ -8,10 +9,9 @@ const SettingsPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const { getToken } = useAuth();
+  const token = getToken();
 
-  const token = localStorage.getItem("token"); // admin token
-
-  // Fetch referral code
   useEffect(() => {
     const fetchCode = async () => {
       setLoading(true);
@@ -30,11 +30,9 @@ const SettingsPage = () => {
     fetchCode();
   }, [token]);
 
-  // Update referral code
   const handleUpdate = async () => {
     setMessage("");
     setError("");
-
     if (!referralCode.trim()) {
       setError("Referral code cannot be empty");
       return;
@@ -61,9 +59,7 @@ const SettingsPage = () => {
     <Container maxWidth="sm">
       <Toolbar />
       <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Admin Settings
-        </Typography>
+        <Typography variant="h4" gutterBottom>Admin Settings</Typography>
         <Typography variant="body1" color="text.secondary" gutterBottom>
           Set the secret referral code that new staff members must use to register an account.
         </Typography>
