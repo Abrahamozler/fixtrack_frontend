@@ -5,21 +5,41 @@ import { Container, Typography, Paper, TextField, Button, Box, Alert, Toolbar } 
 const SettingsPage = () => {
     const [referralCode, setReferralCode] = useState('');
     const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [updating, setUpdating] = useState(false);
 
+    // Fetch existing referral code
     useEffect(() => {
         const fetchCode = async () => {
-            const { data } = await api.get('/settings');
-            if (data) setReferralCode(data.staffReferralCode);
+            setLoading(true);
+            try {
+                const { data } = await api.get('/settings');
+                if (data?.staffReferralCode) setReferralCode(data.staffReferralCode);
+            } catch (err) {
+                setError('Failed to fetch referral code.');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchCode();
     }, []);
 
     const handleUpdate = async () => {
+        setMessage('');
+        setError('');
+        if (!referralCode.trim()) {
+            setError('Referral code cannot be empty.');
+            return;
+        }
+        setUpdating(true);
         try {
             await api.put('/settings', { staffReferralCode: referralCode });
             setMessage('Referral code updated successfully!');
-        } catch (error) {
-            setMessage('Failed to update code.');
+        } catch (err) {
+            setError('Failed to update code.');
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -32,20 +52,28 @@ const SettingsPage = () => {
                     Set the secret referral code that new staff members must use to register an account.
                 </Typography>
                 <Box sx={{ mt: 3 }}>
-                    <TextField
-                        fullWidth
-                        label="Staff Referral Code"
-                        value={referralCode}
-                        onChange={(e) => setReferralCode(e.target.value)}
-                    />
-                    <Button
-                        variant="contained"
-                        sx={{ mt: 2 }}
-                        onClick={handleUpdate}
-                    >
-                        Save Code
-                    </Button>
-                    {message && <Alert severity="success" sx={{ mt: 2 }}>{message}</Alert>}
+                    {loading ? (
+                        <Typography>Loading referral code...</Typography>
+                    ) : (
+                        <>
+                            <TextField
+                                fullWidth
+                                label="Staff Referral Code"
+                                value={referralCode}
+                                onChange={(e) => setReferralCode(e.target.value)}
+                            />
+                            <Button
+                                variant="contained"
+                                sx={{ mt: 2 }}
+                                onClick={handleUpdate}
+                                disabled={updating}
+                            >
+                                {updating ? 'Saving...' : 'Save Code'}
+                            </Button>
+                            {message && <Alert severity="success" sx={{ mt: 2 }}>{message}</Alert>}
+                            {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                        </>
+                    )}
                 </Box>
             </Paper>
         </Container>
