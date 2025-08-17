@@ -1,8 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api.js';
-import jwtDecodeModule from 'jwt-decode'; // default import
-const jwtDecode = jwtDecodeModule.default || jwtDecodeModule; // ✅ ensures default works in Vite
+import { jwtDecode } from 'jwt-decode'; // ✅ use named import
 
 const AuthContext = createContext();
 
@@ -16,12 +15,9 @@ export const AuthProvider = ({ children }) => {
     if (storedUserInfo) {
       try {
         const userInfo = JSON.parse(storedUserInfo);
-        const decodedToken = jwtDecode(userInfo.token);
-        if (decodedToken.exp * 1000 < Date.now()) {
-          logout();
-        } else {
-          setUser(userInfo);
-        }
+        const decodedToken = jwtDecode(userInfo.token); // works now
+        if (decodedToken.exp * 1000 < Date.now()) logout();
+        else setUser(userInfo);
       } catch (error) {
         console.error("Failed to process auth token, clearing.", error);
         localStorage.removeItem('userInfo');
