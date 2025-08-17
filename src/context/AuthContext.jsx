@@ -1,7 +1,8 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api.js';
-import { decode as jwtDecode } from 'jwt-decode'; // ✅ fixed named import
+import jwtDecodeModule from 'jwt-decode'; // default import
+const jwtDecode = jwtDecodeModule.default || jwtDecodeModule; // ✅ ensures default works in Vite
 
 const AuthContext = createContext();
 
@@ -32,29 +33,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (username, password, rememberMe) => {
-    try {
-      const { data } = await api.post('/auth/login', { username, password });
-      if (rememberMe) {
-        localStorage.setItem('userInfo', JSON.stringify(data));
-      } else {
-        sessionStorage.setItem('userInfo', JSON.stringify(data));
-      }
-      setUser(data);
-      navigate('/');
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Login failed');
-    }
+    const { data } = await api.post('/auth/login', { username, password });
+    if (rememberMe) localStorage.setItem('userInfo', JSON.stringify(data));
+    else sessionStorage.setItem('userInfo', JSON.stringify(data));
+    setUser(data);
+    navigate('/');
   };
 
   const register = async (username, password, referralCode) => {
-    try {
-      const { data } = await api.post('/auth/register', { username, password, referralCode });
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      setUser(data);
-      navigate('/');
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Registration failed');
-    }
+    const { data } = await api.post('/auth/register', { username, password, referralCode });
+    localStorage.setItem('userInfo', JSON.stringify(data));
+    setUser(data);
+    navigate('/');
   };
 
   const logout = () => {
