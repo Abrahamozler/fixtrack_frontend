@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api.js';
-import { jwtDecode } from 'jwt-decode';
+import { decode as jwtDecode } from 'jwt-decode'; // ✅ fixed named import
 
 const AuthContext = createContext();
 
@@ -32,18 +32,29 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (username, password, rememberMe) => {
-    const { data } = await api.post('/auth/login', { username, password });
-    if (rememberMe) localStorage.setItem('userInfo', JSON.stringify(data));
-    else sessionStorage.setItem('userInfo', JSON.stringify(data));
-    setUser(data);
-    navigate('/');
+    try {
+      const { data } = await api.post('/auth/login', { username, password });
+      if (rememberMe) {
+        localStorage.setItem('userInfo', JSON.stringify(data));
+      } else {
+        sessionStorage.setItem('userInfo', JSON.stringify(data));
+      }
+      setUser(data);
+      navigate('/');
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Login failed');
+    }
   };
 
   const register = async (username, password, referralCode) => {
-    const { data } = await api.post('/auth/register', { username, password, referralCode });
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    setUser(data);
-    navigate('/');
+    try {
+      const { data } = await api.post('/auth/register', { username, password, referralCode });
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(data);
+      navigate('/');
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Registration failed');
+    }
   };
 
   const logout = () => {
@@ -53,11 +64,8 @@ export const AuthProvider = ({ children }) => {
     navigate('/login');
   };
 
-  // helper to get token
-  const getToken = () => user?.token || null;
-
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, getToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );
